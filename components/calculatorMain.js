@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { DIGITS } from '../shared/digits';
-import { View, Text, Button } from 'react-native';
+import { StyleSheet, SafeAreaView, View, Text, Button } from 'react-native';
 
 
 export default class Calculator extends Component {
@@ -135,63 +135,130 @@ export default class Calculator extends Component {
         }
 
         return (
-            <View>
-                <View>
-                    <Text>React Native Calculator</Text>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.display} className="display">
+                    <Text style={styles.displayText}>
+                        {this.state.setCalc || this.state.input || '0'}
+                    </Text>
                 </View>
-                <View className='calculatorFrame'>
-                    <View className="display">
-                        <Text style={{fontSize: 40}}>
-                            {this.state.setCalc || this.state.input || '0'}
-                        </Text>
+                <View style={styles.operatorContainer} className='operators'>
+                    <View style={styles.operator}>
+                        <Button
+                            className={`col-2 button operator${this.state.addStylesActive ? 'Active' : ''}`}
+                            key='12'
+                            value="+" 
+                            color='#fff'
+                            onPress={() => handleOperator("+")}
+                            title='+'>
+                            +
+                        </Button>
+                    </View>
+                    <View style={styles.operator}>
+                        <Button
+                            className={`col-2 button operator${this.state.subtractStylesActive ? 'Active' : ''}`}
+                            value="-"
+                            key='13'
+                            color='#fff'
+                            onPress={() => handleOperator("-")}
+                            title='-'>
+                            -
+                        </Button>
+                    </View>
+                    <View style={styles.operator}>
+                        <Button
+                            className={`col-2 button operator${this.state.multiplyStylesActive ? 'Active' : ''}`}
+                            value="*"
+                            key='14'
+                            color='#fff'
+                            onPress={() => handleOperator("*")}
+                            title='*'>
+                            *
+                        </Button>
+                    </View>
+                    <View style={styles.operator}>
+                        <Button
+                            className={`col-2 button operator${this.state.divideStylesActive ? 'Active' : ''}`}
+                            value="/"
+                            key='15'
+                            color='#fff'
+                            onPress={() => handleOperator("/")}
+                            title='/'>
+                            /
+                        </Button>
+                    </View>
+                    <View style={styles.operator}>
+                        <Button
+                            className='col-4 button operator'
+                            value='C'
+                            key='16'
+                            color='#fff'
+                            onPress={() => resetCalc()}
+                            title='C'>
+                            C
+                        </Button>
                     </View>
                 </View>
-                <View className='operators'>
-                    <Button
-                        className={`col-2 button operator${this.state.addStylesActive ? 'Active' : ''}`}
-                        value="+" 
-                        onPress={() => handleOperator("+")}
-                        title='+'>
-                        +
-                    </Button>
-                    <Button
-                        className={`col-2 button operator${this.state.subtractStylesActive ? 'Active' : ''}`}
-                        value="-"
-                        onPress={() => handleOperator("-")}
-                        title='-'>
-                        -
-                    </Button>
-                    <Button
-                        className={`col-2 button operator${this.state.multiplyStylesActive ? 'Active' : ''}`}
-                        value="*"
-                        onPress={() => handleOperator("*")}
-                        title='*'>
-                        *
-                    </Button>
-                    <Button
-                        className={`col-2 button operator${this.state.divideStylesActive ? 'Active' : ''}`}
-                        value="/"
-                        onPress={() => handleOperator("/")}
-                        title='/'>
-                        /
-                    </Button>
-                    <Button
-                        className='col-4 button operator'
-                        value='C'
-                        onPress={() => resetCalc()}
-                        title='C'>
-                        C
-                    </Button>
+                <View style={styles.buttonContainer} className="row">
+                {this.state.digits.map(a =>
+                    <View style={styles.button} className="digits">
+                        <Button color='purple' className='col-4 button' key={a} value={a} title={a.toString()} onPress={() => updateCalc(a.toString())}>{a}</Button>
+                    </View>)}
+                    <View style={styles.button}>
+                        <Button className='col-4 button' color='purple' style={{borderBottomLeftRadius: '10px'}} key='0' value='0' title='0' onPress={() => updateCalc('0')}>0</Button>
+                    </View>
+                    <View style={styles.button}>
+                        <Button className='col-4 button' key='10' value='.' title='.' color='purple' onPress={() => updateCalc('.')}>.</Button>
+                    </View>
+                    <View style={styles.operatorEqualSign}>
+                        <Button className='col-4 button operator' color='#fff' key='11' value='=' title='=' onPress={() => solve(this.state.operator)}>=</Button>
+                    </View>
                 </View>
-            <View className="row">
-                <View className="digits">
-                    {this.state.digits.map(a => <Button className='col-4 button' key={a} value={a} title={a.toString()} onPress={() => updateCalc(a.toString())}>{a}</Button>)}
-                    <Button className='col-4 button' style={{borderBottomLeftRadius: '10px'}} value='0' title='0' onPress={() => updateCalc('0')}>0</Button>
-                    <Button className='col-4 button' value='.' title='.' onPress={() => updateCalc('.')}>.</Button>
-                    <Button className='col-4 button operator' style={{borderBottomRightRadius: '10px'}} value='=' title='=' onPress={() => solve(this.state.operator)}>=</Button>
-                </View>
-            </View>
-        </View>
+            </SafeAreaView>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#11000F'
+    },
+    display: {
+        padding: 10
+    },
+    displayText: {
+        color: '#fff',
+        fontSize: 40
+    },
+    button: {
+        borderRadius: 0,
+        fontSize: 20,
+        backgroundColor: '#fff',
+        width: '33.2%'
+    },
+    buttonContainer: {
+        flexWrap: 'wrap',
+        flexDirection: 'row'
+    },
+    operator: {
+        borderRadius: 0,
+        fontSize: 20,
+        backgroundColor: 'purple',
+        color: '#fff',
+        width: '20%'
+    },
+    operatorEqualSign: {
+        borderRadius: 0,
+        fontSize: 20,
+        backgroundColor: 'purple',
+        color: '#fff',
+        width: '33.2%'
+    },
+    operatorContainer: {
+        flexWrap: 'wrap',
+        flexDirection: 'row'
+    }
+})
