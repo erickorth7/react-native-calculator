@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { DIGITS } from '../shared/digits';
 import { StyleSheet, SafeAreaView, View, Text, TouchableOpacity } from 'react-native';
+import Display from './Display';
 
 
 export default class Calculator extends Component {
@@ -24,19 +25,13 @@ export default class Calculator extends Component {
 
 
         const updateCalc = (value) => {
-            if(this.state.result === '') {
-                this.setState({
-                    setCalc: this.state.setCalc + value
-                });
-            } else {
+            if(this.state.setCalc === 'E' || this.state.setCalc.length === 9) {
                 this.setState({
                     setCalc: this.state.setCalc
                 })
-            }
-
-            if(this.state.setCalc.length === 9) {
+            } else {
                 this.setState({
-                    setCalc: this.state.setCalc
+                    setCalc: this.state.setCalc + value
                 });
             }
         }
@@ -73,44 +68,61 @@ export default class Calculator extends Component {
         }
 
         const handleOperator = (value) => {
-            this.setState({
-                input: this.state.setCalc,
-                operator: value,
-                setCalc: ''
-            });
-
-            if(this.state.setCalc === '') {
+            if(this.state.setCalc === 'E') {
+                resetCalc();
+            } else {
                 this.setState({
-                    input: '0'
-                })
+                    input: !this.state.setCalc && this.state.result ? this.state.result 
+                            : this.state.input && this.state.operator ? this.state.input
+                            : !this.state.setCalc && !this.state.result ? '0'
+                            : this.state.setCalc,
+                    operator: value,
+                    setCalc: ''
+                });
             }
+
+            if(this.state.operator && this.state.input && this.state.setCalc) {
+                solve(this.state.operator);
+                this.setState({
+                    operator: value,
+                    setCalc: ''
+                });
+            } 
 
             switch(value) {
                 case '+':
                     this.setState({
                         addStylesActive: true,
-                        result: ''
+                        subtractStylesActive: false,
+                        multiplyStylesActive: false,
+                        divideStylesActive: false,
                     })
                     break;
 
                 case '-':
                     this.setState({
+                        addStylesActive: false,
                         subtractStylesActive: true,
-                        result: ''
+                        multiplyStylesActive: false,
+                        divideStylesActive: false,
                     })
                     break;
 
                 case '*':
                     this.setState({
+                        addStylesActive: false,
+                        subtractStylesActive: false,
                         multiplyStylesActive: true,
-                        result: ''
+                        divideStylesActive: false,
                     })
                     break;
                 
                 case '/':
                     this.setState({
+                        addStylesActive: false,
+                        subtractStylesActive: false,
+                        multiplyStylesActive: false,
                         divideStylesActive: true,
-                        result: ''
                     })
                     break;
             }
@@ -118,77 +130,65 @@ export default class Calculator extends Component {
 
         const solve = (operator) => {
 
+            let calculation;
+            let solution;
+
             switch(operator) {
                 case '+':
-                    if(parseFloat(this.state.input) + parseFloat(this.state.setCalc) > 999999999) {
-                        this.setState({
-                            setCalc: 'E',
-                            addStylesActive: false,
-                            result: this.state.setCalc
-                        })
-                    } else {
-                        this.setState({
-                            setCalc: parseFloat(this.state.input) + parseFloat(this.state.setCalc),
-                            addStylesActive: false,
-                            result: this.state.setCalc
-                        })
-                    }
+                    calculation = parseFloat(this.state.input) + parseFloat(this.state.setCalc);
                     break;
 
                 case '-':
-                    this.setState({
-                        setCalc: parseFloat(this.state.input) - parseFloat(this.state.setCalc),
-                        subtractStylesActive: false,
-                        result: this.state.setCalc
-                    })
+                    calculation = parseFloat(this.state.input) - parseFloat(this.state.setCalc);
                     break;
 
                 case '*':
-                    if(parseFloat(this.state.input) * parseFloat(this.state.setCalc) > 999999999) {
-                        this.setState({
-                            setCalc: 'E',
-                            multiplyStylesActive: false,
-                            result: this.state.setCalc
-                        })
-                    } else {
-                        this.setState({
-                            setCalc: parseFloat(this.state.input) * parseFloat(this.state.setCalc),
-                            multiplyStylesActive: false,
-                            result: this.state.setCalc
-                        })
-                    }
+                    calculation = parseFloat(this.state.input) * parseFloat(this.state.setCalc);
                     break;
 
                 case '/':
-                    if(parseFloat(this.state.input) / parseFloat(this.state.setCalc) > 999999999) {
-                        this.setState({
-                            setCalc: 'E',
-                            divideStylesActive: false,
-                            result: this.state.setCalc
-                        })
-                    } else {
-                        this.setState({
-                            setCalc: parseFloat(this.state.input) / parseFloat(this.state.setCalc),
-                            divideStylesActive: false,
-                            result: this.state.setCalc
-                        })
-                    }
+                    calculation = parseFloat(this.state.input) / parseFloat(this.state.setCalc);
                     break;
+            }
+            
+            !this.state.input && !this.state.setCalc ? solution = 0
+            : this.state.input && !this.state.setCalc ? solution = this.state.input
+            : !this.state.input && this.state.setCalc ? solution = this.state.setCalc
+            : solution = calculation.toString().slice(0,9);
+
+            if(calculation > 999999999) {
+                this.setState({
+                    input: '',
+                    operator: '',
+                    setCalc: 'E',
+                    addStylesActive: false,
+                    subtractStylesActive: false,
+                    multiplyStylesActive: false,
+                    divideStylesActive: false,
+                    result: 'E'
+                });
+            } else {
+                this.setState({
+                    input: solution,
+                    operator: '',
+                    setCalc: '',
+                    addStylesActive: false,
+                    subtractStylesActive: false,
+                    multiplyStylesActive: false,
+                    divideStylesActive: false,
+                    result: solution
+                });
             }
         }
 
         return (
             <SafeAreaView style={styles.container}>
-                <View style={styles.display} className="display">
-                    <Text style={styles.displayText}>
-                        {this.state.setCalc || this.state.input || '0'}
-                    </Text>
-                </View>
+                <Display setCalc={this.state.setCalc} result={this.state.result} input={this.state.input} />
                 <View style={styles.operatorContainer} className='operators'>
                     <TouchableOpacity
                         style={styles.operatorTopLeft}
                         value='C'
-                        key='16'
+                        key='13'
                         onPress={() => resetCalc()}
                     >
                         <View>
@@ -197,7 +197,7 @@ export default class Calculator extends Component {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.operator}
-                        key='12'
+                        key='14'
                         value="+" 
                         onPress={() => handleOperator("+")}
                     >
@@ -208,7 +208,7 @@ export default class Calculator extends Component {
                     <TouchableOpacity
                         style={styles.operator}
                         value="-"
-                        key='13'
+                        key='15'
                         onPress={() => handleOperator("-")}
                     >
                         <View>
@@ -218,7 +218,7 @@ export default class Calculator extends Component {
                     <TouchableOpacity
                         style={styles.operator}
                         value="*"
-                        key='14'
+                        key='16'
                         onPress={() => handleOperator("*")}
                     >
                         <View>
@@ -228,7 +228,7 @@ export default class Calculator extends Component {
                     <TouchableOpacity
                         style={styles.operatorTopRight}
                         value="/"
-                        key='15'
+                        key='17'
                         onPress={() => handleOperator("/")}
                     >
                         <View>
@@ -250,17 +250,17 @@ export default class Calculator extends Component {
                             <Text style={styles.buttonTextStyles}>0</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} key='17' value='.' onPress={() => handleDecimal('.')}>
+                    <TouchableOpacity style={styles.button} key='10' value='.' onPress={() => handleDecimal('.')}>
                         <View>
                             <Text style={styles.buttonTextStyles}>.</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} key='10' value='-' onPress={() => handleNegative('-')}>
+                    <TouchableOpacity style={styles.button} key='11' value='-' onPress={() => handleNegative('-')}>
                         <View>
                             <Text style={styles.buttonTextStyles}>-</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.operatorEqualSign} key='11' value='=' onPress={() => solve(this.state.operator)}>
+                    <TouchableOpacity style={styles.operatorEqualSign} key='12' value='=' onPress={() => solve(this.state.operator)}>
                         <View>
                             <Text style={styles.operatorTextStyles}>=</Text>
                         </View>
@@ -276,13 +276,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         backgroundColor: '#11000F'
-    },
-    display: {
-        padding: 15
-    },
-    displayText: {
-        color: '#fff',
-        fontSize: 60
     },
     button: {
         backgroundColor: '#D3D3D3',
@@ -346,6 +339,7 @@ const styles = StyleSheet.create({
     operatorContainer: {
         flexWrap: 'wrap',
         flexDirection: 'row',
+        width: '100%',
         height: '15%'
     }
-})
+});
